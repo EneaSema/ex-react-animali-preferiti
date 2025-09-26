@@ -1,0 +1,60 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- script per importare React -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <!-- script per importare ReactDom -->
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- script per far leggere i file .JSX al browser-->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- sezione per importare gli stati di React ed usarli -->
+    <script type="text/babel">
+      const { useState } = React;
+
+      const ReactApp = () => {
+        const animals = ["lupo", "squalo", "aquila"];
+
+        return (
+          <details>
+            <summary>I miei Animali</summary>
+            <ul>
+              {animals.map((animal, id) => {
+                return <li key={id}>{animal}</li>;
+              })}
+            </ul>
+          </details>
+        );
+      };
+    </script>
+    <!-- sezione per creare la Root -->
+    <script type="text/babel">
+      const { createRoot } = ReactDOM;
+      const listaAnimali = document.querySelector(`.lista-animali`);
+      const root = createRoot(listaAnimali);
+      root.render(<ReactApp />);
+    </script>
+
+    <title>I miei animali Preferiti</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>I miei animali Preferiti</h1>
+    </header>
+    <main>
+      <!-- parte reattiva -->
+      <div class="lista-animali"></div>
+      <figure>
+        <img src="https://picsum.photos/400/300" alt="Immagine Casuale" />
+      </figure>
+      <div class="lista-animali"></div>
+    </main>
+    <footer>
+      <p>Creato con amore da... un collega sbadato! 🐾</p>
+    </footer>
+  </body>
+</html>
