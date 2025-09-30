@@ -6,12 +6,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>I miei animali Preferiti</title>
     <link rel="stylesheet" href="style.css" />
+    <!-- inserisco gli script per React, ReactDOM e Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- fine inserimento script -->
+    <!-- script per creazione componente -->
+    <script type="text/babel">
+      const ListaAnimali = () => {
+        const animals = [`cane`, `gatto`, `lupo`];
+        return (
+          <details>
+            <summary>Animali</summary>
+            <ul>
+              {animals.map((animal, i) => (
+                <li key={i}>{animal}</li>
+              ))}
+            </ul>
+          </details>
+        );
+      };
+    </script>
+    <!-- creazione script per montaggio -->
+    <script type="text/babel">
+      const { createRoot } = ReactDOM;
+      const listaAnimali = document.querySelector(`.lista-animali`);
+      const root = createRoot(listaAnimali);
+      root.render(<ListaAnimali />);
+    </script>
   </head>
   <body>
     <header>
       <h1>I miei animali Preferiti</h1>
     </header>
     <main>
+      <div class="lista-animali"></div>
       <figure>
         <img src="https://picsum.photos/400/300" alt="Immagine Casuale" />
       </figure>
