@@ -47,6 +47,10 @@
         const [animals, setAnimals] = useState([]);
         // creo variabili dinamica per lo stato show(vedo / non vedo) della modale
         const [show, setShow] = useState(false);
+        // creo variabile dinamica per il caricamento durante la ricerca
+        const [loading, setLoading] = useState(false);
+        // creo variabile dinamica per gli errori
+        const [errorMessagge, setErrorMessagge] = useState(false);
         // creo variabile dinamica per lo variabile value
         // per gestire la sincronizzazione tra quello che scrive utente e quello che vede
         const [animalName, setAnimalName] = useState(``);
@@ -59,16 +63,44 @@
         //   "Cavallo",
         //   "Panda",
         // ];
-        const addAnimal = (event) => {
+        const addAnimal = async (event) => {
           event.preventDefault();
+
           //   controllo se presente animale, in caso di mancanza non faccio niente
-          if (!animalName) return;
-          //   duplico il vecchio array tramite spread operator ed aggiungo il nuovo elemento per attivare la reattività
-          setAnimals([...animals, animalName]);
-          //   rimetto valore a stringa vuota
-          setAnimalName(``);
-          //   chiudo la modale
-          setShow(false);
+          if (!animalName.trim()) return;
+          setLoading(true);
+          try {
+            const response = await fetch(
+              `http://localhost:3333/animals?search=${animalName}`
+            );
+            const [animalData] = await response.json();
+            if (!animalData) {
+              throw new Error("Animale non trovato");
+            }
+            const animal = {
+              name: animalData.name || "Animale non trovato",
+              description:
+                animalData.description || "Descrizione non disponibile",
+              image: animalData.image || null,
+            };
+            //   duplico il vecchio array tramite spread operator ed aggiungo il nuovo elemento per attivare la reattività
+            setAnimals([...animals, animalData]);
+          } catch (error) {
+            console.error(error);
+            const messagge =
+              error.messagge === "Nessun animale trovato"
+                ? "Nessun animale trovato"
+                : "Errore durantela ricerca dell'animale";
+            setErrorMessagge(messagge);
+          } finally {
+            //   rimetto valore a stringa vuota
+            setAnimalName(``);
+            //   chiudo la modale
+            setShow(false);
+            // chiudo il caricamento
+            setLoading(false);
+          }
+
           // soluzione per milestone 2
           //   const animalRandom = Math.floor(
           //     Math.random() * animalsChoices.length
@@ -81,10 +113,23 @@
             <button onClick={() => setShow(true)}>Aggiungi Animale</button>
             <details>
               <summary>Animali</summary>
-              <ul>
+              {errorMessagge && <p>{errorMessagge}</p>}
+              <div>
                 {animals &&
-                  animals.map((animal, i) => <li key={i}>{animal}</li>)}
-              </ul>
+                  animals.map((animal, i) => (
+                    <div key={i} className="card">
+                      <div>
+                        <h3>{animal.name}</h3>
+                        <p>{animal.description}</p>
+                      </div>
+                      {animal.image && (
+                        <figure>
+                          <img src={animal.image} alt={animal.name} />
+                        </figure>
+                      )}
+                    </div>
+                  ))}
+              </div>
             </details>
             <Modal
               show={show}
@@ -98,6 +143,7 @@
                     value={animalName}
                     onChange={(e) => setAnimalName(e.target.value)}
                   />
+                  {loading && <p>Caricando il risultato....</p>}
                 </>
               }
             />
