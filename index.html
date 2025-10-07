@@ -57,6 +57,8 @@
 
         const [animals, setAnimals] = useState([]);
         const [show, setShow] = useState(false);
+        const [loading, setloading] = useState(false);
+        const [errorMessagge, setErrorMessagge] = useState(``);
         const [animalName, setAnimalName] = useState(``);
 
         // array fornito dalla milestone 2
@@ -78,20 +80,69 @@
         //   setAnimals([...animals, animalSelected]);
         // };
 
-        const addAnimal = () => {
-          setAnimals([...animals, animalName]);
-          setAnimalName(``);
-          setShow(false);
+        // soluzione milestone 3
+        // const addAnimal = () => {
+        //   setAnimals([...animals, animalName]);
+        //   setAnimalName(``);
+        //   setShow(false);
+        // };
+
+        const addAnimal = async () => {
+          try {
+            if (!animalName.trim()) {
+              return;
+            }
+            setloading(true);
+            setErrorMessagge(``);
+            const resp = await fetch(
+              `http://localhost:3333/animals?search=${animalName}`
+            );
+
+            const [data] = await resp.json();
+            if (!data) {
+              throw new Error("Nessun animale trovato");
+            }
+            console.log(data);
+            const animal = {
+              name: data.name,
+              description: data.description || "Descrizone nnon disponibile",
+              image: data.image || "Immagine non disponibile",
+            };
+
+            setAnimals([...animals, animal]);
+          } catch (error) {
+            console.error(error);
+            const messagge =
+              error.messagge === "Nessun animale trovato"
+                ? "Nessun animale trovato"
+                : "Errore durante la ricerca dell'animale";
+            setErrorMessagge(messagge);
+          } finally {
+            setloading(false);
+            setAnimalName(``);
+            setShow(false);
+          }
         };
         return (
           <>
             <button onClick={() => setShow(true)}>Aggiungi Animale</button>
+            {errorMessagge && <p style={{ color: `red` }}>{errorMessagge}</p>}
             <details>
               <summary>Animali</summary>
-              <ul>
+              <div>
                 {animals &&
-                  animals.map((animal, i) => <li key={i}>{animal}</li>)}
-              </ul>
+                  animals.map((animal, i) => (
+                    <div className="card" key={i}>
+                      <h3>{animal.name}</h3>
+                      <p>{animal.description}</p>
+                      {animal.image && (
+                        <figure>
+                          <img src={animalName.image} alt={animal.name} />
+                        </figure>
+                      )}
+                    </div>
+                  ))}
+              </div>
             </details>
             <Modal
               show={show}
@@ -105,6 +156,7 @@
                     value={animalName}
                     onChange={(e) => setAnimalName(e.target.value)}
                   />
+                  {loading && <p> Sto effettuando il caricamento...</p>}
                 </>
               }
             />
